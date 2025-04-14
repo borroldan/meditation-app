@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    apply(plugin = "com.google.gms.google-services")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

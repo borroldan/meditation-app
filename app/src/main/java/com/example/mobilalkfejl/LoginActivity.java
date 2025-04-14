@@ -3,6 +3,8 @@ package com.example.mobilalkfejl;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -35,11 +37,13 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.login_button);
         signupRedirectText = findViewById(R.id.signupRedirectText);
 
+        animateLoginButton();
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!validateUsername() | !validatePassword()) {
-
+                    return;
                 } else {
                     checkUser();
                 }
@@ -125,5 +129,28 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void animateLoginButton() {
+        ObjectAnimator scaleXUp = ObjectAnimator.ofFloat(loginButton, "scaleX", 1.2f);
+        ObjectAnimator scaleYUp = ObjectAnimator.ofFloat(loginButton, "scaleY", 1.2f);
+        ObjectAnimator scaleXDown = ObjectAnimator.ofFloat(loginButton, "scaleX", 1f);
+        ObjectAnimator scaleYDown = ObjectAnimator.ofFloat(loginButton, "scaleY", 1f);
+
+        scaleXUp.setDuration(150);
+        scaleYUp.setDuration(150);
+        scaleXDown.setDuration(150);
+        scaleYDown.setDuration(150);
+
+        scaleXDown.setInterpolator(new android.view.animation.OvershootInterpolator());
+        scaleYDown.setInterpolator(new android.view.animation.OvershootInterpolator());
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.play(scaleXUp).with(scaleYUp);
+        animatorSet.play(scaleXDown).with(scaleYDown).after(scaleXUp);
+
+        animatorSet.setStartDelay(300);
+
+        animatorSet.start();
     }
 }
