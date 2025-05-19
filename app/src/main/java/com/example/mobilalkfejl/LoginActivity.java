@@ -11,7 +11,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,6 +30,10 @@ public class LoginActivity extends AppCompatActivity {
     Button loginButton;
     TextView signupRedirectText;
 
+    TextView guestLoginButton;
+
+    FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,18 +43,35 @@ public class LoginActivity extends AppCompatActivity {
         loginPassword = findViewById(R.id.login_password);
         loginButton = findViewById(R.id.login_button);
         signupRedirectText = findViewById(R.id.signupRedirectText);
+        guestLoginButton = findViewById(R.id.guestLoginButton);
+
+        auth = FirebaseAuth.getInstance();
 
         animateLoginButton();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!validateUsername() | !validatePassword()) {
-                    return;
-                } else {
-                    checkUser();
-                }
+        loginButton.setOnClickListener(v -> {
+            String email    = loginUsername.getText().toString().trim();
+            String password = loginPassword.getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                if (email.isEmpty())    loginUsername.setError("Required");
+                if (password.isEmpty()) loginPassword.setError("Required");
+                return;
             }
+
+            auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = auth.getCurrentUser();
+                            Intent intent = new Intent(this, MeditationsActivity.class);
+                            intent.putExtra("uid", user.getUid());
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Login failed: " + task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
         signupRedirectText.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +80,27 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
                 startActivity(intent);
             }
+        });
+
+        guestLoginButton.setOnClickListener(v -> {
+            auth.signInAnonymously()
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser anonUser = auth.getCurrentUser();
+
+                            Intent intent = new Intent(LoginActivity.this, MeditationsActivity.class);
+                            intent.putExtra("uid", anonUser.getUid());
+                            intent.putExtra("guest", true);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(
+                                    LoginActivity.this,
+                                    "Guest login failed: " + task.getException().getMessage(),
+                                    Toast.LENGTH_LONG
+                            ).show();
+                        }
+                    });
         });
 
     }

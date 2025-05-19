@@ -10,6 +10,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -19,6 +22,7 @@ public class SignupActivity extends AppCompatActivity {
     TextView loginRedirectText;
     Button signupButton;
     FirebaseDatabase database;
+    FirebaseAuth auth;
     DatabaseReference reference;
 
     @Override
@@ -33,25 +37,36 @@ public class SignupActivity extends AppCompatActivity {
         loginRedirectText = findViewById(R.id.loginRedirectText);
         signupButton = findViewById(R.id.signup_button);
 
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        auth = FirebaseAuth.getInstance();
 
-                database = FirebaseDatabase.getInstance();
-                reference = database.getReference("users");
+        signupButton.setOnClickListener(v -> {
+            String email    = signupEmail.getText().toString().trim();
+            String password = signupPassword.getText().toString().trim();
+            String username = signupUsername.getText().toString().trim();
+            String name     = signupName.getText().toString().trim();
 
-                String name = signupName.getText().toString();
-                String email = signupEmail.getText().toString();
-                String username = signupUsername.getText().toString();
-                String password = signupPassword.getText().toString();
-
-                HelperClass helperClass = new HelperClass(name, email, username, password);
-                reference.child(username).setValue(helperClass);
-
-                Toast.makeText(SignupActivity.this, "You have signed up successfully!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
-                startActivity(intent);
+            if (email.isEmpty() || password.isEmpty() || username.isEmpty() || name.isEmpty()) {
+                Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = auth.getCurrentUser();
+                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                    .setDisplayName(name)
+                                    .build();
+                            user.updateProfile(profileUpdates);
+
+                            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, MeditationsActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Signup failed: " + task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
         loginRedirectText.setOnClickListener(new View.OnClickListener() {

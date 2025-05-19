@@ -195,6 +195,35 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:padding="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/country"
+                android:layout_weight="1"
+                android:text="Country"
+                android:textStyle="bold"
+                android:textColor="@color/lavender"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/profileCountry"
+                android:text="country"
+                android:layout_weight="1"
+                android:textAlignment="viewEnd"
+                android:textColor="@color/black"
+                android:textSize="18sp"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <Button
@@ -202,7 +231,7 @@
         android:layout_height="60dp"
         android:id="@+id/editButton"
         android:gravity="center"
-        android:text="Edit Profile"
+        android:text="User Profile"
         android:textSize="18sp"
         app:cornerRadius = "20dp"
         app:layout_constraintBottom_toBottomOf="parent"
